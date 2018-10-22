@@ -1,6 +1,6 @@
 ﻿<#
 .NOTES
-    File Name : Get-RandomLunchRestaurant.ps1
+    File Name : Get-RandomRestaurant.ps1
     Author : Emanuel Palm
     Last Edited : 2018-10-22
 
@@ -40,13 +40,13 @@
     A list of restaurants with Name, Rating, Website, Distance and Walking Time according to Google.
 
 .EXAMPLE
-    .\Get-RandomLunchRestaurant.ps1 -Count 3 -SearchOrigin 'Norra Stationsgatan 67, Stockholm' -APIKey 'abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm' -Blacklist "Default Burger Place","Sushi Bar 1"
+    .\Get-RandomRestaurant.ps1 -Count 3 -SearchOrigin 'Norra Stationsgatan 67, Stockholm' -APIKey 'abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm' -Blacklist "Default Burger Place","Sushi Bar 1"
 
     Gets 3 random restaurants that are open right now among the 60 closest to Norra Stationsgatan 67 in Stockholm, blacklisting two restaurants called "Default Burger Place" and "Sushi Bar 1".
     The API key used for google is abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm.
 
 .EXAMPLE
-    .\Get-RandomLunchRestaurant.ps1 -Count 5 -SearchOrigin 'Vanadisplan, Stockholm' -WalkOrigin 'Hälsingegatan 47, Stockholm' -APIKey 'abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm' -BlacklistPath 'C:\Temp\ExcludedRestaurants.txt'
+    .\Get-RandomRestaurant.ps1 -Count 5 -SearchOrigin 'Vanadisplan, Stockholm' -WalkOrigin 'Hälsingegatan 47, Stockholm' -APIKey 'abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm' -BlacklistPath 'C:\Temp\ExcludedRestaurants.txt'
 
     Gets 5 random restaurants that are open right now among the 60 closest to Vanadisplan in Stockholm, blacklisting any restaurants in text file "C:\Temp\ExcludedRestaurants".
     Distance to restaurants is calculated from Hälsingegatan 47 in Stockholm instead of Vanadisplan.
@@ -94,13 +94,13 @@ if ($PSCmdlet.ParameterSetName -eq 'BlacklistPath')
         $Blacklist = Get-Content $BlacklistPath -ErrorAction Stop | Where { $_ -ne "" }
         
         $Output = "Read content from $BlacklistPath and found $($Blacklist.Count) restaurants to exclude: $($Blacklist -join ', ')."
-        #Write-EventLog -LogName Application -Source WSH -EventId 0 -EntryType Information -Message "Get-RandomLunchRestaurant script: $Output"
+        #Write-EventLog -LogName Application -Source WSH -EventId 0 -EntryType Information -Message "Get-RandomRestaurant script: $Output"
         Write-Verbose $Output
     }
     catch
     {
         Write-Error "Error reading from Blacklist file path $BlacklistPath. $($Error[0].ToString())"
-        #Write-EventLog -LogName Application -Source WSH -EventId 0 -EntryType Error -Message "Get-RandomLunchRestaurant script: Failed to read from file path $BlacklistPath. Error: $($Error[0].ToString())"
+        #Write-EventLog -LogName Application -Source WSH -EventId 0 -EntryType Error -Message "Get-RandomRestaurant script: Failed to read from file path $BlacklistPath. Error: $($Error[0].ToString())"
         exit
     }
 }
