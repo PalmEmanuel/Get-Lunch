@@ -2,11 +2,11 @@
     Count = 3
     SearchOrigin = 'Medborgarplatsen, Stockholm'
     BlackListPath = "$PSScriptRoot\IO\Blacklist.txt"
-    APIKey = 'AIzaSyCwCYzCnbLHDhcyvavMV7M-QeyVUKzTUsU'
+    APIKey = 'abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm'
 }
 
 Set-Location $PSScriptRoot
-$Restaurants = .\Get-RandomLunchRestaurant.ps1 @RestaurantParams
+$Restaurants = .\Get-RandomRestaurant.ps1 @RestaurantParams
 
 $MailParameters = @{
     SMTPServer = 'smtp.test.com'
