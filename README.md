@@ -2,6 +2,9 @@
 Do you ever find yourself not being able to choose where to eat for lunch?  
 Enter Get-Lunch, a modern PS way of choosing where to eat!
 
+![Example Image](https://raw.githubusercontent.com/MrEpiX/Get-Lunch/master/Resources/ExampleImage.png)
+
+
 ## Features
 * Emailing - You can email your coworkers what our PowerShell overlords have decided that they all will eat today!
 * Polls - You can add polls to your emails so that your coworkers have the illusion of choosing where they will eat today!
