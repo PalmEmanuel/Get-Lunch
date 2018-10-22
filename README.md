@@ -10,11 +10,11 @@ Enter Get-Lunch, a modern PS way of choosing where to eat!
 * Send-MailMessage inline images - https://gallery.technet.microsoft.com/scriptcenter/Send-MailMessage-3a920a6d
 
 ## Requirements
-Access to a STMP-server for Send-LunchEmail.ps1.
-Google API Key with the following APIs enabled:
-* Distance Matrix API
-* Geocoding API
-* Places API
+* Access to a STMP-server for Send-LunchEmail.ps1.  
+* Google API Key with the following APIs enabled:
+    * Distance Matrix API
+    * Geocoding API
+    * Places API
 
 ## License
 This software is available under the license MIT.
