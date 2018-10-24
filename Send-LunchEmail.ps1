@@ -2,14 +2,14 @@
 .NOTES
     File Name : Send-LunchEmail.ps1
     Author : Emanuel Palm
-    Last Edited : 2018-10-22
+    Last Edited : 2018-10-24
 
 .Synopsis
     Sends an email with restaurants, with an optional poll.
 
 .DESCRIPTION
     Sends an email with a list of restaurants to use as a base for what to eat for lunch.
-    An optional poll can be created through API at https://www.strawpoll.me/ with the options.
+    Two optional polls with the restaurants are available, either through API at https://www.strawpoll.me/ or through Outlook.
     The script looks for the image .\Resources\LunchTime.png to include in the page.
 
 .PARAMETER Text
@@ -19,7 +19,6 @@
 .PARAMETER PostText
     This text will show as a smaller text at the end of the email.
     Adding HTML as part of this parameter is fine.
-    If you write {mail} in this text it will be replaced by the email of the recipient.
     
 .PARAMETER SMTPServer
     The mailaddress to send the email from.
@@ -36,14 +35,17 @@
 .PARAMETER Restaurants
     A list of restaurants with properties Name, Rating, Website, Distance and Time where all should be strings.
     
-.PARAMETER Poll
-    Whether or not to create a poll to include in the email with the restaurants as options.
+.PARAMETER OutlookPoll
+    Whether or not to send the email through the ComObject Outlook.Application and include a poll with the restaurants as options.
+
+.PARAMETER StrawPoll
+    Whether or not to create a poll through StrawPoll to include in the email with the restaurants as options.
     
-.PARAMETER PollText
-    The text of the poll button.
+.PARAMETER StrawPollText
+    The text of the StrawPoll button.
     
-.PARAMETER PollTitle
-    The title of the poll.
+.PARAMETER StrawPollTitle
+    The title of the StrawPoll.
 
 .EXAMPLE
     .\Send-LunchEmail.ps1 -SMTPServer 'example.smtp.se' -To 'example@test.com' -From 'lunch@example.com' -Text 'The lunch has been chosen!' -Subject 'Lunch!' -PostText 'Talk to Emanuel Palm if you want to unsubscribe.' -Restaurants $RestaurantList
@@ -98,16 +100,19 @@ param(
     [ValidateNotNullOrEmpty()]
     [String]$Subject,
 
-    [Parameter(Mandatory=$true,ParameterSetName='Poll')]
-    [Switch]$Poll,
+    [Parameter(Mandatory=$true,ParameterSetName='StrawPoll')]
+    [Switch]$StrawPoll,
 
-    [Parameter(Mandatory=$true,ParameterSetName='Poll')]
+    [Parameter(Mandatory=$true,ParameterSetName='StrawPoll')]
     [ValidateNotNullOrEmpty()]
     [String]$PollText,
 
-    [Parameter(Mandatory=$true,ParameterSetName='Poll')]
+    [Parameter(Mandatory=$true,ParameterSetName='StrawPoll')]
     [ValidateNotNullOrEmpty()]
-    [String]$PollTitle
+    [String]$PollTitle,
+
+    [Parameter(Mandatory=$true,ParameterSetName='OutlookPoll')]
+    [Switch]$OutlookPoll
 )
 
 try
@@ -149,7 +154,7 @@ Write-Verbose "Inverted Color: $TextColor"
 # The default color for the text in the email, used for the body text for example.
 $TextColor = 'FFFFFF'
 
-if ($Poll)
+if ($StrawPoll)
 {
     # Create strawpoll through API with disabled duplication checking to be able to vote several times from the same public IP
     $StrawPollURL = "https://www.strawpoll.me"
@@ -278,7 +283,7 @@ $HTML = @"
                     </tr>
                     <tr>
                       <td height="90" align="center" valign="top">
-                          <img src="cid:LunchTime" border="0" />
+                          <img src="cid:LunchTime.png" border="0" />
                         </a>
                       </td>
                     </tr>
@@ -329,18 +334,68 @@ $HTML = @"
 
 $MailParameters = @{
     SMTPServer = $SMTPServer
+    To = $To
     From = $From
     Subject = $Subject
     BodyAsHTML = $true
+    Body = $HTML
     InlineAttachments = @{
         LunchTime = "$PSScriptRoot\Resources\LunchTime.png"
     }
 }
 
-# If you use "{mail}" anywhere in the body or post-text, it will replace it with the email of the recipient.
-foreach ($Mail in $To)
+# If the user chose to create a poll through Outlook
+if ($OutlookPoll)
 {
-    # Personalizes each mail with email address at the end by swapping {mail} for address
-    $MailParameters.Body = ($HTML -replace '{mail}',$Mail)
-    Send-MailMessage @MailParameters -To $Mail
+    try
+    {
+        $Outlook = New-Object -ComObject Outlook.Application
+    }
+    catch
+    {
+        Write-Error "Problem Creating ComObject Outlook.Application!"
+    }
+
+    try
+    {
+        # Create email
+        $Mail = $Outlook.CreateItem(0)
+        
+        # Add recipients of the email from parameter
+        $MailParameters.To | ForEach-Object { $Mail.Recipients.Add($($_)) | Out-Null }
+
+        $Mail.Subject = $MailParameters.Subject
+        $Mail.HTMLBody = $MailParameters.Body
+
+        # Add lunch picture as attachment to be able to have the picture in the HTML
+        $Mail.Attachments.Add($($MailParameters.InlineAttachments.LunchTime),0,0) | Out-Null
+
+        # Add the restaurants as poll options
+        $Mail.VotingOptions = $Restaurants.Name -join ';'
+
+        $Mail.Send()
+    }
+    catch
+    {
+        Write-Error "Problem creating and sending email through Outlook!"
+    }
+    finally
+    {
+        try
+        {
+            # Stop Outlook and clean up the process
+            $Outlook.Quit()
+            [System.Runtime.Interopservices.Marshal]::ReleaseComObject($Outlook) | Out-Null
+        }
+        catch
+        {
+            Write-Error "Problem quitting Outlook!"
+        }
+    }
+}
+else
+{
+    # The inline attachment name has a different format depending on if the mail is sent through Outlook or not.
+    $MailParameters.Body = ($HTML -replace 'LunchTime.png','LunchTime')
+    Send-MailMessage @MailParameters
 }
