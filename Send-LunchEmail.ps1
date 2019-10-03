@@ -46,6 +46,15 @@
     
 .PARAMETER StrawPollTitle
     The title of the StrawPoll.
+    
+.PARAMETER Credential
+    The credential used, for uses such as O365 SMTP.
+    
+.PARAMETER Port
+    The port to use for Send-MailMessage.
+    
+.PARAMETER UseSsl
+    Whether or not to use SSL when sending the email.
 
 .EXAMPLE
     .\Send-LunchEmail.ps1 -SMTPServer 'example.smtp.se' -To 'example@test.com' -From 'lunch@example.com' -Text 'The lunch has been chosen!' -Subject 'Lunch!' -PostText 'Talk to Emanuel Palm if you want to unsubscribe.' -Restaurants $RestaurantList
