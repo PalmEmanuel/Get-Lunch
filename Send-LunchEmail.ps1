@@ -112,7 +112,19 @@ param(
     [String]$PollTitle,
 
     [Parameter(Mandatory=$true,ParameterSetName='OutlookPoll')]
-    [Switch]$OutlookPoll
+    [Switch]$OutlookPoll,
+
+    [Parameter(Mandatory=$false,ParameterSetName='StrawPoll')]
+    [Parameter(Mandatory=$true,ParameterSetName='O365')]
+    [System.Management.Automation.PSCredential]$Credential,
+
+    [Parameter(Mandatory=$false,ParameterSetName='StrawPoll')]
+    [Parameter(Mandatory=$true,ParameterSetName='O365')]
+    [int]$Port,
+
+    [Parameter(Mandatory=$false,ParameterSetName='StrawPoll')]
+    [Parameter(Mandatory=$true,ParameterSetName='O365')]
+    [switch]$UseSsl
 )
 
 try
@@ -165,7 +177,7 @@ if ($StrawPoll)
             "options" = $Restaurants.Name
             "dupcheck" = 'disabled'
         }
-        $PollResponse = Invoke-WebRequest -Uri "$StrawPollURL/api/v2/polls" -Method Post -Body ($PollRequest | ConvertTo-Json) -ContentType "application/json" -UseDefaultCredentials -ErrorAction Stop | ConvertFrom-Json
+        $PollResponse = Invoke-RestMethod -Uri "$StrawPollURL/api/v2/polls" -Method Post -Body ($PollRequest | ConvertTo-Json) -ContentType "application/json; charset=utf-8" -UseDefaultCredentials -ErrorAction Stop
         
         # The response from the API call will include an ID that corresponds to our poll, we use this as link for the button.
         $PollLink = "$StrawPollURL/$($PollResponse.id)"
@@ -342,6 +354,13 @@ $MailParameters = @{
     InlineAttachments = @{
         LunchTime = "$PSScriptRoot\Resources\LunchTime.png"
     }
+}
+
+if ($Credential)
+{
+    $MailParameters['Credential'] = $Credential
+    $MailParameters['UseSsl'] = $UseSsl
+    $MailParameters['Port'] = $Port
 }
 
 # If the user chose to create a poll through Outlook

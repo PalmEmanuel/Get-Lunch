@@ -2,9 +2,8 @@
 
 # Examples of some of the parameters available for Get-RandomRestaurant.ps1
 $RestaurantParams = @{
-    Count = 3
+    Count = 5
     SearchOrigin = 'Medborgarplatsen, Stockholm'
-    BlackListPath = "$PSScriptRoot\IO\Blacklist.txt"
     APIKey = 'abCdeFghIjkLmnOpqRstUvxYzaB-cdEfgHijKlm'
 }
 
@@ -13,15 +12,18 @@ $Restaurants = .\Get-RandomRestaurant.ps1 @RestaurantParams
 
 # Examples of the parameters available for Send-LunchEmail.ps1
 $MailParameters = @{
-    SMTPServer = 'smtp.test.com'
+    SMTPServer = 'smtp.office365.com'
+    Credential = Get-Credential
+    Port = 587
+    UseSsl = $true
     To = 'test@example.com'
-    From = 'example@test.com'
+    From = 'test@example.com'
     Text = "Vote for today's lunch restaurant!"
     Subject = 'Lunch time!'
     Restaurants = $Restaurants
     PollText = "Vote here!"
     PollTitle = 'May the best restaurant win!'
-    Poll = $true
+    StrawPoll = $true
     # Most of the text parameters have "support" for HTML
     PostText = @"
     This mail was generated in the middle of Stockholm, Sweden.
@@ -31,4 +33,4 @@ $MailParameters = @{
 }
 
 .\Send-LunchEmail.ps1 @MailParameters
-.\Save-LunchToFile.ps1 -Text $MailParameters.Text -PostText $MailParameters.PostText -Restaurants $Restaurants -Poll -PollText $MailParameters.PollText -PollTitle $MailParameters.PollTitle
+#.\Save-LunchToFile.ps1 -Text $MailParameters.Text -PostText $MailParameters.PostText -Restaurants $Restaurants -Poll -PollText $MailParameters.PollText -PollTitle $MailParameters.PollTitle
